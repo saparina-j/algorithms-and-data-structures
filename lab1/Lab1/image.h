@@ -1,5 +1,3 @@
-#pragma once
-
 #include <cstddef>
 #include <limits>
 #include <ostream>
@@ -17,6 +15,12 @@ namespace lab1 {
         Image& operator=(const Image& other);
         ~Image();
 
+        T& operator()(std::size_t row, std::size_t col);
+        const T& operator()(std::size_t row, std::size_t col) const;
+
+        std::size_t width() const noexcept;
+        std::size_t height() const noexcept;
+
     private:
         T* data_;
         std::size_t width_;
@@ -24,6 +28,7 @@ namespace lab1 {
 
         static T randomValue();
     };
+
 
     template <typename T>
     Image<T>::Image(std::size_t width, std::size_t height, bool randomize)
@@ -66,6 +71,36 @@ namespace lab1 {
     Image<T>::~Image() {
         delete[] data_;
     }
+
+    
+
+    template <typename T>
+    T& Image<T>::operator()(std::size_t row, std::size_t col) {
+        if (row >= height_ || col >= width_) {
+            throw std::out_of_range("Image index out of range");
+        }
+        return data_[row * width_ + col];
+    }
+
+    template <typename T>
+    const T& Image<T>::operator()(std::size_t row, std::size_t col) const {
+        if (row >= height_ || col >= width_) {
+            throw std::out_of_range("Image index out of range");
+        }
+        return data_[row * width_ + col];
+    }
+
+    template <typename T>
+    std::size_t Image<T>::width() const noexcept {
+        return width_;
+    }
+
+    template <typename T>
+    std::size_t Image<T>::height() const noexcept {
+        return height_;
+    }
+
+    
 
     template <typename T>
     T Image<T>::randomValue() {
