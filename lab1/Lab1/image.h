@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstddef>
 #include <limits>
 #include <ostream>
@@ -28,7 +30,6 @@ namespace lab1 {
 
         static T randomValue();
     };
-
 
     template <typename T>
     Image<T>::Image(std::size_t width, std::size_t height, bool randomize)
@@ -72,8 +73,6 @@ namespace lab1 {
         delete[] data_;
     }
 
-    
-
     template <typename T>
     T& Image<T>::operator()(std::size_t row, std::size_t col) {
         if (row >= height_ || col >= width_) {
@@ -100,8 +99,6 @@ namespace lab1 {
         return height_;
     }
 
-    
-
     template <typename T>
     T Image<T>::randomValue() {
         static std::mt19937 generator(std::random_device{}());
@@ -121,4 +118,4 @@ namespace lab1 {
         }
     }
 
-}  
+}  // namespace lab1
