@@ -23,6 +23,11 @@ namespace lab1 {
         std::size_t width() const noexcept;
         std::size_t height() const noexcept;
 
+        Image operator+(const Image& other) const;
+        Image operator*(const Image& other) const;
+        Image operator*(T scalar) const;
+        Image operator+(T scalar) const;
+
     private:
         T* data_;
         std::size_t width_;
@@ -118,4 +123,108 @@ namespace lab1 {
         }
     }
 
+    template <typename T>
+    T addValues(T lhs, T rhs) {
+        if constexpr (std::is_same_v<T, bool>) {
+            return lhs || rhs;
+        }
+        else if constexpr (std::is_integral_v<T>) {
+            long long sum = static_cast<long long>(lhs) + static_cast<long long>(rhs);
+            if (sum > static_cast<long long>(std::numeric_limits<T>::max())) {
+                return std::numeric_limits<T>::max();
+            }
+            if (sum < static_cast<long long>(std::numeric_limits<T>::min())) {
+                return std::numeric_limits<T>::min();
+            }
+            return static_cast<T>(sum);
+        }
+        else {
+            return lhs + rhs;
+        }
+    }
+
+    template <typename T>
+    T multiplyValues(T lhs, T rhs) {
+        if constexpr (std::is_same_v<T, bool>) {
+            return lhs && rhs;
+        }
+        else if constexpr (std::is_integral_v<T>) {
+            long long product = static_cast<long long>(lhs) * static_cast<long long>(rhs);
+            if (product > static_cast<long long>(std::numeric_limits<T>::max())) {
+                return std::numeric_limits<T>::max();
+            }
+            if (product < static_cast<long long>(std::numeric_limits<T>::min())) {
+                return std::numeric_limits<T>::min();
+            }
+            return static_cast<T>(product);
+        }
+        else {
+            return lhs * rhs;
+        }
+    }
+
+    template <typename T>
+    Image<T> Image<T>::operator+(const Image& other) const {
+        std::size_t newWidth = width_ > other.width_ ? width_ : other.width_;
+        std::size_t newHeight = height_ > other.height_ ? height_ : other.height_;
+        Image result(newWidth, newHeight, false);
+
+        for (std::size_t row = 0; row < newHeight; ++row) {
+            for (std::size_t col = 0; col < newWidth; ++col) {
+                T lhs = (row < height_ && col < width_) ? (*this)(row, col) : T{};
+                T rhs = (row < other.height_ && col < other.width_) ? other(row, col) : T{};
+                result(row, col) = addValues(lhs, rhs);
+            }
+        }
+        return result;
+    }
+
+    template <typename T>
+    Image<T> Image<T>::operator*(const Image& other) const {
+        std::size_t newWidth = width_ > other.width_ ? width_ : other.width_;
+        std::size_t newHeight = height_ > other.height_ ? height_ : other.height_;
+        Image result(newWidth, newHeight, false);
+
+        for (std::size_t row = 0; row < newHeight; ++row) {
+            for (std::size_t col = 0; col < newWidth; ++col) {
+                T lhs = (row < height_ && col < width_) ? (*this)(row, col) : T{};
+                T rhs = (row < other.height_ && col < other.width_) ? other(row, col) : T{};
+                result(row, col) = multiplyValues(lhs, rhs);
+            }
+        }
+        return result;
+    }
+
+    template <typename T>
+    Image<T> Image<T>::operator*(T scalar) const {
+        Image result(width_, height_, false);
+        for (std::size_t row = 0; row < height_; ++row) {
+            for (std::size_t col = 0; col < width_; ++col) {
+                result(row, col) = multiplyValues((*this)(row, col), scalar);
+            }
+        }
+        return result;
+    }
+
+    template <typename T>
+    Image<T> Image<T>::operator+(T scalar) const {
+        Image result(width_, height_, false);
+        for (std::size_t row = 0; row < height_; ++row) {
+            for (std::size_t col = 0; col < width_; ++col) {
+                result(row, col) = addValues((*this)(row, col), scalar);
+            }
+        }
+        return result;
+    }
+
 }  // namespace lab1
+
+template <typename T>
+lab1::Image<T> operator*(T scalar, const lab1::Image<T>& image) {
+    return image * scalar;
+}
+
+template <typename T>
+lab1::Image<T> operator+(T scalar, const lab1::Image<T>& image) {
+    return image + scalar;
+}
