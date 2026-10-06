@@ -217,6 +217,43 @@ namespace lab1 {
         return result;
     }
 
+
+    template <typename T>
+    Image<T> Image<T>::operator!() const {
+        Image result(width_, height_, false);
+        for (std::size_t row = 0; row < height_; ++row) {
+            for (std::size_t col = 0; col < width_; ++col) {
+                T value = (*this)(row, col);
+                if constexpr (std::is_same_v<T, bool>) {
+                    result(row, col) = !value;
+                }
+                else {
+                    result(row, col) = static_cast<T>(std::numeric_limits<T>::max() - value);
+                }
+            }
+        }
+        return result;
+    }
+
+    template <typename T>
+    double Image<T>::fillRatio() const {
+        if (width_ == 0 || height_ == 0) {
+            return 0.0;
+        }
+        double sum = 0.0;
+        for (std::size_t i = 0; i < width_ * height_; ++i) {
+            sum += static_cast<double>(data_[i]);
+        }
+        double maxValue = static_cast<double>(std::numeric_limits<T>::max());
+        if (maxValue == 0.0) {
+            return 0.0;
+        }
+        return sum / (static_cast<double>(width_ * height_) * maxValue);
+    }
+
+
+
+
 }  // namespace lab1
 
 template <typename T>
