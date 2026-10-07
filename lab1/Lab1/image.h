@@ -12,6 +12,8 @@ namespace lab1 {
     template <typename T>
     class Image {
     public:
+        static constexpr double kEpsilon = 1e-9;
+
         Image(std::size_t width, std::size_t height, bool randomize);
         Image(const Image& other);
         Image& operator=(const Image& other);
@@ -27,6 +29,12 @@ namespace lab1 {
         Image operator*(const Image& other) const;
         Image operator*(T scalar) const;
         Image operator+(T scalar) const;
+        Image operator!() const;
+
+        double fillRatio() const;
+
+        bool operator==(const Image& other) const;
+        bool operator!=(const Image& other) const;
 
     private:
         T* data_;
@@ -217,7 +225,6 @@ namespace lab1 {
         return result;
     }
 
-
     template <typename T>
     Image<T> Image<T>::operator!() const {
         Image result(width_, height_, false);
@@ -228,7 +235,8 @@ namespace lab1 {
                     result(row, col) = !value;
                 }
                 else {
-                    result(row, col) = static_cast<T>(std::numeric_limits<T>::max() - value);
+                    result(row, col) =
+                        static_cast<T>(std::numeric_limits<T>::max() - value);
                 }
             }
         }
@@ -251,10 +259,61 @@ namespace lab1 {
         return sum / (static_cast<double>(width_ * height_) * maxValue);
     }
 
+    template <typename T>
+    bool valuesEqual(T lhs, T rhs) {
+        if constexpr (std::is_floating_point_v<T>) {
+            double diff = static_cast<double>(lhs) - static_cast<double>(rhs);
+            if (diff < 0.0) {
+                diff = -diff;
+            }
+            return diff <= Image<T>::kEpsilon;
+        }
+        else {
+            return lhs == rhs;
+        }
+    }
 
+    template <typename T>
+    bool Image<T>::operator==(const Image& other) const {
+        if (width_ != other.width_ || height_ != other.height_) {
+            return false;
+        }
+        for (std::size_t row = 0; row < height_; ++row) {
+            for (std::size_t col = 0; col < width_; ++col) {
+                if (!valuesEqual((*this)(row, col), other(row, col))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
+    template <typename T>
+    bool Image<T>::operator!=(const Image& other) const {
+        return !(*this == other);
+    }
 
 }  // namespace lab1
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const lab1::Image<T>& image) {
+    for (std::size_t row = 0; row < image.height(); ++row) {
+        for (std::size_t col = 0; col < image.width(); ++col) {
+            T value = image(row, col);
+            if constexpr (std::is_same_v<T, bool>) {
+                os << (value ? '1' : '0');
+            }
+            else {
+                os << value;
+            }
+            if (col + 1 < image.width()) {
+                os << ' ';
+            }
+        }
+        os << '\n';
+    }
+    return os;
+}
 
 template <typename T>
 lab1::Image<T> operator*(T scalar, const lab1::Image<T>& image) {
