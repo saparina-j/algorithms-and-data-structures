@@ -66,3 +66,15 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Visual Studio
+.vs/
+Debug/
+Release/
+x64/
+x86/
+*.user
+
+# IDE
+.idea/
+.vscode/
