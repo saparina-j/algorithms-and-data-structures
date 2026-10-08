@@ -1,20 +1,50 @@
-﻿// Lab1.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
-
+﻿#include <cstddef>
 #include <iostream>
 
-int main()
-{
-    std::cout << "Hello World!\n";
+#include "image.h"
+
+template <typename T>
+void drawFilledCircle(lab1::Image<T>& image,
+    double centerX,
+    double centerY,
+    double radius,
+    T fillValue) {
+    const double radiusSquared = radius * radius;
+
+    for (std::size_t row = 0; row < image.height(); ++row) {
+        for (std::size_t col = 0; col < image.width(); ++col) {
+            const double dx = static_cast<double>(col) - centerX;
+            const double dy = static_cast<double>(row) - centerY;
+            if (dx * dx + dy * dy <= radiusSquared) {
+                image(row, col) = fillValue;
+            }
+        }
+    }
 }
 
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
+int main() {
+    std::size_t width = 0;
+    std::size_t height = 0;
+    double centerX = 0.0;
+    double centerY = 0.0;
+    double radius = 0.0;
+    int fillValue = 0;
 
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
+    std::cout << "Enter image width and height: ";
+    std::cin >> width >> height;
+
+    std::cout << "Enter circle center (x y) and radius: ";
+    std::cin >> centerX >> centerY >> radius;
+
+    std::cout << "Enter fill value: ";
+    std::cin >> fillValue;
+
+    lab1::Image<short> image(width, height, false);
+
+    drawFilledCircle(image, centerX, centerY, radius,
+        static_cast<short>(fillValue));
+
+    std::cout << "Result:\n" << image;
+
+    return 0;
+}
